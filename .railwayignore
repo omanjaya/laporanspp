@@ -1,0 +1,19 @@
+# Ignore Next.js frontend (deploy to Vercel separately)
+laporanspp-nextjs/
+
+# Development files
+.claude/
+.gemini/
+.vscode/
+.idea/
+
+# Documentation
+*.md
+
+# Data files
+*.pdf
+*.xlsx
+*.xls
+
+# Tests (optional, remove if you want tests on Railway)
+tests/
