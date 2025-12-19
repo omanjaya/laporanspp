@@ -26,13 +26,13 @@ class AuthMiddleware
         // Get API key from header
         $apiKey = $request->header('X-API-KEY');
 
-        // Allow dashboard access without auth for demo (remove in production)
-        if ($request->is('/dashboard') || $request->is('/')) {
+        // Allow public routes without auth
+        if ($request->is('dashboard') || $request->is('/') || $request->is('api/health') || $request->is('up')) {
             return $next($request);
         }
 
         // For API endpoints, require API key or session
-        if ($request->is('/api/*')) {
+        if ($request->is('api/*')) {
             
             // Check session authentication first
             if (session()->has('authenticated')) {
