@@ -22,8 +22,8 @@ class RateLimitMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Skip rate limiting for dashboard access and analytics (remove in production)
-        if ($request->is('/dashboard') || $request->is('/') || $request->is('api/dashboard/analytics')) {
+        // Skip rate limiting for public routes
+        if ($request->is('dashboard') || $request->is('/') || $request->is('api/health') || $request->is('up') || $request->is('api/dashboard/analytics')) {
             return $next($request);
         }
 
@@ -104,16 +104,13 @@ class RateLimitMiddleware
      */
     private function isBlacklisted(string $ipAddress, string $userAgent): bool
     {
-        // Check against known malicious patterns
+        // Check against known malicious patterns (removed curl/wget for health checks)
         $maliciousPatterns = [
-            '/bot/i',
-            '/crawler/i',
-            '/scanner/i',
-            '/curl/i',
-            '/wget/i',
-            '/python/i',
-            '/java/i',
-            '/go-http/i'
+            '/sqlmap/i',
+            '/nikto/i',
+            '/nmap/i',
+            '/masscan/i',
+            '/dirbuster/i'
         ];
 
         // Block requests without proper user agent
@@ -140,7 +137,7 @@ class RateLimitMiddleware
     {
         $isAuthenticated = $apiKey && $this->apiKeyService->validateApiKey($apiKey);
 
-        if ($request->is('/api/rekon/import')) {
+        if ($request->is('api/rekon/import')) {
             return [
                 [
                     'key' => 'import_minute',
@@ -155,7 +152,7 @@ class RateLimitMiddleware
             ];
         }
 
-        if ($request->is('/api/rekon/export/*')) {
+        if ($request->is('api/rekon/export/*')) {
             return [
                 [
                     'key' => 'export_minute',
@@ -170,7 +167,7 @@ class RateLimitMiddleware
             ];
         }
 
-        if ($request->is('/api/rekon/search')) {
+        if ($request->is('api/rekon/search')) {
             return [
                 [
                     'key' => 'search_minute',
