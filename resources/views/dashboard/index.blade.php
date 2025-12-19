@@ -5,7 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Sistem Rekon SPP</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    @if(app()->environment('local'))
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @else
+        <!-- Production: Use Tailwind CDN + inline styles -->
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="{{ asset('js/dashboard.js') }}" defer></script>
+    @endif
 </head>
 <body class="bg-gray-100 min-h-screen">
     <!-- Header with Navigation -->
