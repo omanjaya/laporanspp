@@ -1,0 +1,88 @@
+// Prisma schema for LOCAL DEVELOPMENT (SQLite)
+// Copy this to schema.prisma for local development
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model RekonData {
+  id                Int      @id @default(autoincrement())
+  sekolah           String   // SMAN_1_DENPASAR
+  idSiswa           String   // 24908, 23988
+  namaSiswa         String   // IDA BAGUS BAYUJIWADHITA MANUAB
+  alamat            String?  @map("alamat")
+  kelas             String   // XI., XII.
+  jurusan           String   // 12, MIPA1, MIPA6
+
+  // Data Tagihan
+  jumTagihan        Int      @map("jum_tagihan") // 350000
+  biayaAdm          Int      @default(0) @map("biaya_adm")
+  tagihanLain       Int      @default(0) @map("tagihan_lain")
+  ketTagihanLain    String?  @map("ket_tagihan_lain")
+  keterangan        String?
+
+  // Periode (Kriteria penting untuk pencarian)
+  tahun             Int      // 2024, 2023
+  bulan             Int      // 1-12
+  danaMasyarakat    String   @map("dana_masyarakat") // 350000
+
+  // Data Transaksi
+  tglTx             DateTime @map("tgl_tx")
+  tglTxFormatted    String   @map("tgl_tx_formatted") // 01/07/2024 7:42
+  stsBayar          Int      @map("sts_bayar") // 1=aktif
+  kdCab             String   @map("kd_cab") // EB, TLR
+  kdUser            String   @map("kd_user") // igate_pac, webteller
+  stsReversal       Int      @default(0) @map("sts_reversal")
+  noBukti           String   @map("no_bukti") // 4171505446
+
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  schoolId          Int?     @map("school_id")
+  school            School?  @relation(fields: [schoolId], references: [id])
+
+  @@index([sekolah, tahun, bulan], map: "idx_sekolah_tahun_bulan")
+  @@index([idSiswa, tahun, bulan], map: "idx_siswa_tahun_bulan")
+  @@index([namaSiswa], map: "idx_nama_siswa")
+  @@index([noBukti], map: "idx_no_bukti")
+  @@map("rekon_data")
+}
+
+model School {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  code        String   @unique
+  address     String?
+  phone       String?
+  email       String?
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  rekonData   RekonData[]
+  users       User[]
+
+  @@map("schools")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String
+  password  String
+  role      String   @default("user") // admin, user
+  schoolId  Int?     @map("school_id")
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  school    School?  @relation(fields: [schoolId], references: [id])
+
+  @@map("users")
+}
