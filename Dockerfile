@@ -11,7 +11,9 @@ RUN apt-get update && apt-get install -y \
     zip \
     unzip \
     nginx \
-    supervisor
+    supervisor \
+    nodejs \
+    npm
 
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -28,14 +30,21 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Set working directory
 WORKDIR /var/www/html
 
-# Copy composer files first for better caching
+# Copy package.json first for npm caching
+COPY package*.json ./
+RUN npm install 2>/dev/null || true
+
+# Copy composer files
 COPY composer.json composer.lock ./
 
-# Install dependencies
+# Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader --no-scripts
 
 # Copy application files
 COPY . .
+
+# Build frontend assets
+RUN npm run build 2>/dev/null || echo "No npm build script"
 
 # Run composer scripts after copying files
 RUN composer dump-autoload --optimize

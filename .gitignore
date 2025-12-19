@@ -35,4 +35,3 @@ Thumbs.db
 *.sqlite
 *.db
 package-lock.json
-package.json
